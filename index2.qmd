@@ -32,55 +32,50 @@ p_ice <- plot_ly(ant,
         type = 'scatter', 
         mode = 'lines',
         name = 'S Max',
-        showlegend = F,
-        line = list(color = 'darkblue'))
-
-p_ice <- p_ice %>%
-  add_trace(y = ~predict(s_max_lm),
-            name = 'Trend',
-            showlegend = T,
-            hoverinfo = 'skip',
-            line = list(width = 1.5, color = 'red'))
+        line = list(color = 'red'))
 
 p_ice <- p_ice %>%
   add_trace(y = ~predict(n_max_lm),
             showlegend = F,
             hoverinfo = 'skip',
-            line = list(width =1.5, color = 'red'))
+            line = list(color = 'gray'))
+
+p_ice <- p_ice %>%
+  add_trace(y = ~predict(s_max_lm),
+            showlegend = F,
+            hoverinfo = 'skip',
+            line = list(color = 'gray'))
 
 p_ice <- p_ice %>%
   add_trace(y = ~predict(n_min_lm),
             showlegend = F,
             hoverinfo = 'skip',
-            line = list(width = 1.5,color = 'red'))
+            line = list(color = 'gray'))
 
 p_ice <- p_ice %>%
   add_trace(y = ~predict(s_min_lm),
             showlegend = F,
             hoverinfo = 'skip',
-            line = list(width = 1.5, color = 'red'))
+            line = list(color = 'gray'))
 
 p_ice <- p_ice %>% 
   add_trace(y = ~ant$max_extent,
             name = 'S_Max2',
-            showlegend = T,
+            showlegend = F,
             hoverinfo = 'skip',
-            line = list(color = 'black'))
+            line = list(color = 'red'))
 p_ice <- p_ice %>%
   add_trace(y = ~arctic$max_extent,
             name = 'N_Max',
-            showlegend = T,
-            line = list(color = 'darkslategray'))
+            line = list(color = 'orange'))
 p_ice <- p_ice%>%
   add_trace(y = ~arctic$min_extent,
             name = 'N_Min',
-            showlegend = T,
-            line = list(color = 'dodgerblue'))
+            line = list(color = 'black'))
 p_ice <- p_ice%>%
   add_trace(y = ~ant$min_extent,
             name = 'S_Min',
-            showlegend = T,
-            line = list(color = 'darkblue'))
+            line = list(color = 'blue'))
 
 p_ice <- p_ice%>%
   rangeslider() %>%
