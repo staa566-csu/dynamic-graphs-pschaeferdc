@@ -9,21 +9,66 @@ editor: visual
 #Data import and cleaning
 library(tidyverse)
 library(ggthemes)
-library(viridis)
-data <- read_csv("C:\\Users\\pscha\\Documents\\_School\\2022_Fall_Classes\\STAA_566_DataViz\\ice.csv")
+library(plotly)
+arctic <- read_csv("C:\\Users\\pscha\\Documents\\_School\\2022_Fall_Classes\\STAA_566_DataViz\\arctic_ice.csv")
+ant <- read_csv("C:\\Users\\pscha\\Documents\\_School\\2022_Fall_Classes\\STAA_566_DataViz\\antarctic_ice.csv")
 ```
 
 ## Graph
 
 ```{r}
-p_ice <-ggplot(data = data,
-       mapping = aes(year, min_extent)) +
-  geom_point(color = 'blue') +
-  geom_smooth(method=lm, color = 'red', fill = 'lightblue')
-p_ice + theme_light() + 
-  ylab("Minimum ice extent (millions of sq km)") + 
-  xlab('Year')+
-  labs(title = 'Minimum Arctic Ice Extent 1978-2021',
-          subtitle = 'Area of ocean with at lease 15% sea ice',
-          caption = 'Based on data from the national Snow and Ice Data Center. Data downloaded on 16 September 2022')
+p_min <- plot_ly(arctic, 
+        x = ~year, 
+        y = ~min_extent, 
+        type = 'scatter', 
+        mode = 'lines',
+        name = 'Min')
+
+p_max <- plot_ly(arctic, 
+        x = ~year, 
+        y = ~max_extent, 
+        type = 'scatter', 
+        mode = 'lines',
+        name = 'Max')
+p_ice2 <- subplot(list(p_min,p_max),
+                  nrows = 2,
+                  shareX = TRUE,
+                  titleX = FALSE) 
+p_ice2
 ```
+
+```{r}
+#make some best-fit lines
+n_max_lm <- lm(max_extent~year,arctic)
+n_min_lm <- lm(min_extent~year,arctic)
+s_max_lm <- lm(max_extent~year,ant)
+s_min_lm <- lm(min_extent~year,ant)
+
+p_ice <- plot_ly(arctic, 
+        x = ~year, 
+        y = ~min_extent, 
+        type = 'scatter', 
+        mode = 'lines',
+        name = 'N_Min')%>%
+  add_lines(y = ~predict(n_min_lm, showlegend = FALSE))%>%
+  add_lines(y = ~max_extent, name = 'N_Max')%>%
+  add_lines(y = ~predict(n_max_lm,showlegend = F))%>%
+  add_lines(y = ~ant$max_extent, name = 'S_Max')%>%
+  add_lines(y = ~predict(s_max_lm,showlegend = F))%>%
+  add_lines(y = ~ant$min_extent, name = 'S_Min')%>%
+  add_lines(y = ~predict(s_min_lm,showlegend = F))
+p_ice <- p_ice%>%
+  rangeslider() %>%
+  layout(hovermode = "x")
+p_ice <- p_ice %>%
+  layout(title = 
+           'Minimum and Maximum Annual Arctic Ice Extents (millions sq km)',
+           xaxis = list(title=NA),
+           yaxis = list(title = "7-day average count"),
+         showlegend = T)
+p_ice
+```
+
+The data source for this plot is the National Snow and Ice Data Center' (NSIDC) ice extent data for the Arctic (https://nsidc.org/arcticseaicenews/sea-ice-tools/). The data is in spreadsheet, and the only processing I had to do was to save the tab with the annual summer minimum and winter maximum extents as a separate .csv.
+
+I built this plot to test some theories I had about the behavior of Arctic and Antarctic ice. First I knew that Arctic ice extents have been slowly decreasing over the last 24 years of monitoring, and I thought that Antarctic extents would display the same behavior
