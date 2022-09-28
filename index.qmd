@@ -87,7 +87,7 @@ p_ice <- p_ice%>%
   layout(hovermode = "x")
 
 p_ice <- p_ice %>%
-  layout(title ='Minimum and Maximum Annual Arctic Ice Extents',
+  layout(title ='Minimum and Maximum Annual Polar Ice Extents',
          xaxis = list(title=NA),
          yaxis = list(title = "Millions of sq. km
                       "))
