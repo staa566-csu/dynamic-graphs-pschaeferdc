@@ -1,0 +1,92 @@
+---
+title: "STAA566hw2"
+author: "Paul Schaefer"
+format: html
+editor: visual
+---
+
+## Quarto
+
+```{r data import, include=FALSE}
+#Data import and cleaning
+library(tidyverse)
+library(ggthemes)
+library(plotly)
+arctic <- read_csv("C:\\Users\\pscha\\Documents\\_School\\2022_Fall_Classes\\STAA_566_DataViz\\arctic_ice.csv")
+ant <- read_csv("C:\\Users\\pscha\\Documents\\_School\\2022_Fall_Classes\\STAA_566_DataViz\\antarctic_ice.csv")
+```
+
+```{r}
+#make some best-fit lines
+n_max_lm <- lm(max_extent~year,arctic)
+n_min_lm <- lm(min_extent~year,arctic)
+s_max_lm <- lm(max_extent~year,ant)
+s_min_lm <- lm(min_extent~year,ant)
+```
+
+```{r}
+# make the plot
+p_ice <- plot_ly(ant, 
+        x = ~year, 
+        y = ~max_extent, 
+        type = 'scatter', 
+        mode = 'lines',
+        name = 'S Max',
+        line = list(color = 'red'))
+
+p_ice <- p_ice %>%
+  add_trace(y = ~predict(n_max_lm),
+            showlegend = F,
+            hoverinfo = 'skip',
+            line = list(color = 'gray'))
+
+p_ice <- p_ice %>%
+  add_trace(y = ~predict(s_max_lm),
+            showlegend = F,
+            hoverinfo = 'skip',
+            line = list(color = 'gray'))
+
+p_ice <- p_ice %>%
+  add_trace(y = ~predict(n_min_lm),
+            showlegend = F,
+            hoverinfo = 'skip',
+            line = list(color = 'gray'))
+
+p_ice <- p_ice %>%
+  add_trace(y = ~predict(s_min_lm),
+            showlegend = F,
+            hoverinfo = 'skip',
+            line = list(color = 'gray'))
+
+p_ice <- p_ice %>% 
+  add_trace(y = ~ant$max_extent,
+            name = 'S_Max2',
+            showlegend = F,
+            hoverinfo = 'skip',
+            line = list(color = 'red'))
+p_ice <- p_ice %>%
+  add_trace(y = ~arctic$max_extent,
+            name = 'N_Max',
+            line = list(color = 'orange'))
+p_ice <- p_ice%>%
+  add_trace(y = ~arctic$min_extent,
+            name = 'N_Min',
+            line = list(color = 'black'))
+p_ice <- p_ice%>%
+  add_trace(y = ~ant$min_extent,
+            name = 'S_Min',
+            line = list(color = 'blue'))
+
+p_ice <- p_ice%>%
+  rangeslider() %>%
+  layout(hovermode = "x")
+
+p_ice <- p_ice %>%
+  layout(title ='Minimum and Maximum Annual Arctic Ice Extents',
+         xaxis = list(title=NA),
+         yaxis = list(title = "Millions of sq. km
+                      "))
+
+p_ice
+```
+

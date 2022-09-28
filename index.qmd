@@ -1,0 +1,107 @@
+---
+title: "STAA566hw2"
+author: "Paul Schaefer"
+format: html
+editor: visual
+---
+
+## Quarto
+
+```{r data import, include=FALSE}
+#Data import and cleaning
+library(tidyverse)
+library(ggthemes)
+library(plotly)
+arctic <- read_csv("C:\\Users\\pscha\\Documents\\_School\\2022_Fall_Classes\\STAA_566_DataViz\\arctic_ice.csv")
+ant <- read_csv("C:\\Users\\pscha\\Documents\\_School\\2022_Fall_Classes\\STAA_566_DataViz\\antarctic_ice.csv")
+```
+
+```{r}
+#make some best-fit lines
+n_max_lm <- lm(max_extent~year,arctic)
+n_min_lm <- lm(min_extent~year,arctic)
+s_max_lm <- lm(max_extent~year,ant)
+s_min_lm <- lm(min_extent~year,ant)
+```
+
+```{r}
+# make the plot
+p_ice <- plot_ly(ant, 
+        x = ~year, 
+        y = ~max_extent, 
+        type = 'scatter', 
+        mode = 'lines',
+        name = 'S Max',
+        showlegend = F,
+        line = list(color = 'darkblue'))
+
+p_ice <- p_ice %>%
+  add_trace(y = ~predict(s_max_lm),
+            name = 'Trend',
+            showlegend = T,
+            hoverinfo = 'skip',
+            line = list(width = 1.5, color = 'red'))
+
+p_ice <- p_ice %>%
+  add_trace(y = ~predict(n_max_lm),
+            showlegend = F,
+            hoverinfo = 'skip',
+            line = list(width =1.5, color = 'red'))
+
+p_ice <- p_ice %>%
+  add_trace(y = ~predict(n_min_lm),
+            showlegend = F,
+            hoverinfo = 'skip',
+            line = list(width = 1.5,color = 'red'))
+
+p_ice <- p_ice %>%
+  add_trace(y = ~predict(s_min_lm),
+            showlegend = F,
+            hoverinfo = 'skip',
+            line = list(width = 1.5, color = 'red'))
+
+p_ice <- p_ice %>% 
+  add_trace(y = ~ant$max_extent,
+            name = 'Antarctic Max',
+            showlegend = T,
+            hoverinfo = 'skip',
+            line = list(color = 'navy'))
+p_ice <- p_ice %>%
+  add_trace(y = ~arctic$max_extent,
+            name = 'Arctic Max',
+            showlegend = T,
+            line = list(color = 'darkslategray'))
+p_ice <- p_ice%>%
+  add_trace(y = ~arctic$min_extent,
+            name = 'Arctic Min',
+            showlegend = T,
+            line = list(color = 'dodgerblue'))
+p_ice <- p_ice%>%
+  add_trace(y = ~ant$min_extent,
+            name = 'Antarctic Min',
+            showlegend = T,
+            line = list(color = 'blue'))
+
+p_ice <- p_ice%>%
+  #rangeslider() %>%
+  layout(hovermode = "x")
+
+p_ice <- p_ice %>%
+  layout(title ='Minimum and Maximum Annual Polar Ice Extents',
+         xaxis = list(title=NA),
+         yaxis = list(title = "Millions of sq. km
+                      "))
+
+p_ice
+```
+The data source for this project is a spreadsheet download from the National Snow and Ice Data Center's (NSIDC) sea ice index (https://nsidc.org/arcticseaicenews/sea-ice-tools/). It is a record of the polar sea ice extents from 1979-present based on data from satellite passive microwave sensors.
+
+I began the graph as an exercise in data exploration. I hypothesized that:
+1) Arctic and Antarctic ice extents probably behaved the same way, namely a decline in extent over the last 40 years
+2) That declines in extent would be much more pronounced in summer than winter. Sea ice extent has been declining over the period of the satellite record, and I thought that extent would decline more to warmer summers. Winters are still dark and cold in the polar regions, so I thought that the decrease would be noticeable less in the winter.
+
+My first hypothesis was not borne out by the initial data exploration. The regression lines actually show a positive trend in extent minima and maxima for the Antarctic ice! As for my second hypothesis, the positive trend in Antarctic ice extent makes any comparison of relative decrease meaningless. With the Arctic ice, there is a difference between the slopes, but the difference is not as great as I expected. It is enough that if I were interested in further exploration, I could see if there is any statistical significance to the slope differences.
+
+In order to compare all three of the series, I decided to put them all on the same plot so the user could see them 'stacked' of each other (experimenting with faceted plots led to graphs that did not allow for easy comparisons). Locking the hovermode on the x-axis was also useful for being able to simultaneously see the ice extents in a given year. I experimented with a range slider but did not find it to be particularly useful: the year-to-year difference is slight enough that zooming in to a smaller set of years just 'flattens' the data. I removed it because it just didn't seem useful the way that the rangeslider on the COVID sample in class did. This plot didn't have the same effect of vastly different y-scales of data, where the change in one series was only apparent after zooming in. 
+
+My other formattin choices dealt with the look and feel of the graph. I decided to work with a cool color palate for the different ice series to go with the theme of a cold subject I wanted contrast but even weight to be given to the trend lines, and I wanted them to 'pop' against the series, so I settled on red for the trend lines. Placing the trend on top of the data series 'buried' the parts of the series with little year-to year change, so I put the trend lines behind the series, and I'm satisfied that the eye can still follow the trend and be able to see the year to year variations in the series. The default grid lines and labeling conveyed their information sufficiently without distracting from the data, so I did not modify them. I tried directly labeling the series rather than labeling them in the legend, but decided that having a legend with only 'Trend' in it looked awkward, so I kept the series in the legend but made sure the labels were in the same order as the series on the plot.
